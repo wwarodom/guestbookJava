@@ -1,0 +1,111 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-spring4-4.dtd">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorator="layout">
+<head>
+    <title>Index page</title>
+</head>
+
+<body>
+
+    <div layout:fragment="content">
+        <h1 th:text="'Guestbook: ' + ${name} + '!'" ></h1>
+
+        <!-- Check edit result -->
+        <div th:if="${update eq 'unsuccess'}">
+            <div class="alert alert-danger alert-dismissible" role="alert">
+                <strong>Error!</strong> Message is NOT updated.
+            </div>
+        </div>
+        <div th:if="${update eq 'success'}">
+            <div class="alert alert-success alert-dismissible" role="alert">
+                <strong>Success!</strong> Message <span th:text="${id}" /> has been updated.
+            </div>
+        </div>
+        <!--Check delete result-->
+        <div th:if="${delete eq 'success'}">
+            <div class="alert alert-success alert-dismissible" role="alert">
+                <strong>Success!</strong> Message <span th:text="${id}" /> has been deleted.
+            </div>
+        </div>
+
+        <!--Fetch Guestbook message -->
+        <div th:each="guestbook,status : ${guestbooks}">
+            <div class="row col-md-12 well">
+                <span th:text="${status.count}" />:
+                <span th:text="${guestbook.message}"/>
+                <br/> <br/>
+                <div class="pull-right">
+                    <strong>From: </strong>
+                    <span th:text="${guestbook.name}"/>
+                    <a th:href="${'/edit/' + guestbook.id}"><span class="glyphicon glyphicon-edit"></span></a>
+                    <a th:href="${'/delete/' + guestbook.id}"><span class="glyphicon glyphicon-remove"></span></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination Bar -->
+        <div class="row">
+            <div class="form-group col-md-1">
+                <select class="form-control pagination" id="pageSizeSelect" onchange="changePageAndSize()">
+                    <option th:each="pageSize : ${pageSizes}" th:text="${pageSize}" th:value="${pageSize}" th:selected="${pageSize} == ${selectedPageSize}"></option>
+                </select>
+            </div>
+            <div th:if="${guestbooks.getTotalPages() != 1}" class="form-group col-md-11 pagination-centered">
+                <ul class="pagination">
+                    <li th:class="${guestbooks.getNumber() == 0} ? disabled">
+                        <a class="pageLink" th:href="@{/(pageSize=${selectedPageSize}, page=1)}">&laquo;</a>
+                    </li>
+                    <li th:class="${guestbooks.getNumber() == 0} ? disabled">
+                        <a class="pageLink" th:href="@{/(pageSize=${selectedPageSize}, page=${guestbooks.getNumber()})}">&larr;</a>
+                    </li>
+
+                    <li th:class="${guestbooks.getNumber() == (page - 1)} ? 'active pointer-disabled'"
+                        th:each="page : ${#numbers.sequence(pager.getStartPage(), pager.getEndPage())}">
+                        <a class="pageLink" th:href="@{/(pageSize=${selectedPageSize}, page=${page})}" th:text="${page}"></a>
+                    </li>
+
+                    <li th:class="${guestbooks.getNumber() + 1 == guestbooks.getTotalPages()} ? disabled">
+                        <a class="pageLink" th:if="${guestbooks.getNumber() + 1 != guestbooks.getTotalPages()}"
+                           th:href="@{/(pageSize=${selectedPageSize}, page=${guestbooks.getNumber() + 2})}">&rarr;</a>
+                        <a class="pageLink" th:if="${guestbooks.getNumber() + 1 == guestbooks.getTotalPages()}"
+                           th:href="@{/(pageSize=${selectedPageSize}, page=${guestbooks.getTotalPages()})}">&rarr;</a>
+                    </li>
+                    <li th:class="${guestbooks.getNumber() + 1 == guestbooks.getTotalPages()} ? disabled">
+                        <a class="pageLink" th:href="@{/(pageSize=${selectedPageSize},page=${guestbooks.getTotalPages()})}">&raquo;</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+        <!--Guestbook form-->
+        <div class="row">
+            <div class="col-sm-4" th:fragment="content">
+                <form class="form-horizontal" role="form" action="new" method="post" >
+                    <div class="form-group">
+                        <label class="control-label" for="name">Name:</label>
+                        <div>
+                            <input type="text" class="form-control" id="name" name="name"
+                                   maxlength="15" size="15" required="required"
+                                   placeholder="Enter name"/>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label" for="message">Message:</label>
+                        <div>
+                  <textarea class="form-control" id="message" name="message"
+                            rows="5" cols="5" required="required"
+                            placeholder="Enter message"></textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="reset" class="btn btn-default">Reset</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
